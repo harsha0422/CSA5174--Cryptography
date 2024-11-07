@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#define ALPHABET_SIZE 26
+#define MAX_CIPHERTEXT_LENGTH 1000
+void countFrequency(const char *ciphertext, int *freq) {
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i])) {
+            char c = toupper(ciphertext[i]);
+            freq[c - 'A']++;
+        }
+    }
+}
+void sortFrequency(int *freq, int *sortedIndices) {
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        sortedIndices[i] = i;
+    }
+    for (int i = 0; i < ALPHABET_SIZE - 1; i++) {
+        for (int j = i + 1; j < ALPHABET_SIZE; j++) {
+            if (freq[sortedIndices[i]] < freq[sortedIndices[j]]) {
+                int temp = sortedIndices[i];
+                sortedIndices[i] = sortedIndices[j];
+                sortedIndices[j] = temp;
+            }
+        }
+    }
+}
+void substituteCiphertext(const char *ciphertext, char *plaintext, char *mapping) {
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i])) {
+            char c = toupper(ciphertext[i]);
+            plaintext[i] = mapping[c - 'A'];
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[strlen(ciphertext)] = '\0';  
+}
+void generatePossiblePlaintexts(const char *ciphertext, int topN) {
+    char englishFreq[ALPHABET_SIZE] = {'E', 'T', 'A', 'O', 'I', 'N', 'S', 'H', 'R', 'D', 'L', 'U', 'C', 'M', 'F', 'Y', 'P', 'B', 'G', 'V', 'K', 'X', 'Q', 'J', 'Z', 'W'};
+
+    int freq[ALPHABET_SIZE] = {0};  
+    int sortedIndices[ALPHABET_SIZE];  
+    countFrequency(ciphertext, freq);
+    sortFrequency(freq, sortedIndices);
+    char mapping[ALPHABET_SIZE];
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        mapping[i] = englishFreq[sortedIndices[i]];  
+    }
+    for (int i = 0; i < topN; i++) {
+        char plaintext[MAX_CIPHERTEXT_LENGTH];
+        substituteCiphertext(ciphertext, plaintext, mapping);
+
+        printf("Possible Plaintext %d: %s\n", i + 1, plaintext);
+        char temp = mapping[0];
+        for (int j = 0; j < ALPHABET_SIZE - 1; j++) {
+            mapping[j] = mapping[j + 1];
+        }
+        mapping[ALPHABET_SIZE - 1] = temp;
+    }
+}
+int main() {
+    char ciphertext[MAX_CIPHERTEXT_LENGTH];
+    int topN;
+    printf("Enter the ciphertext: ");
+    fgets(ciphertext, MAX_CIPHERTEXT_LENGTH, stdin);
+    ciphertext[strcspn(ciphertext, "\n")] = '\0'; 
+    printf("How many possible plaintexts do you want to see? ");
+    scanf("%d", &topN);
+    generatePossiblePlaintexts(ciphertext, topN);
+    return 0;
+}
