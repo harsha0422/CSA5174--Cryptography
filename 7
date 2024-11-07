@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+void frequencyAnalysis(char *ciphertext) {
+    int freq[256] = {0};
+    int i;
+    for (i = 0; i < strlen(ciphertext); i++) {
+        freq[(int)ciphertext[i]]++;
+    }
+    printf("Frequency Analysis:\n");
+    for (i = 0; i < 256; i++) {
+        if (freq[i] > 0) {
+            printf("%c: %d\n", i, freq[i]);
+        }
+    }
+}
+void substituteCharacters(char *ciphertext, char *plaintext, char *substitutions) {
+    int i;
+    for (i = 0; i < strlen(ciphertext); i++) {
+        int j;
+        for (j = 0; j < strlen(substitutions); j += 2) {
+            if (ciphertext[i] == substitutions[j]) {
+                plaintext[i] = substitutions[j + 1];
+                break;
+            }
+        }
+        if (j >= strlen(substitutions)) {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+}
+int main() {
+    char ciphertext[] = "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡*8†83 (88)5*†;46(;88*96*?;8)*‡(;485);5*†2:*‡(;4956*2(5*—4)8¶8* ;4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81 (‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?;";
+    char plaintext[256] = "";
+    char substitutions[256] = "";
+    frequencyAnalysis(ciphertext);
+    strcat(substitutions, "‡e"); 
+    strcat(substitutions, "†h");
+    strcat(substitutions, "*t"); 
+    strcat(substitutions, ");a");
+    strcat(substitutions, "6o");
+    strcat(substitutions, "8n");
+    strcat(substitutions, "5r");
+    strcat(substitutions, "4s");
+    strcat(substitutions, "2d");
+    strcat(substitutions, "1i");
+    strcat(substitutions, "0l");
+    strcat(substitutions, "-m");
+    strcat(substitutions, "3b");
+    strcat(substitutions, ":g");
+    strcat(substitutions, ";p");
+    strcat(substitutions, "?c");
+    substituteCharacters(ciphertext, plaintext, substitutions);
+    printf("Decrypted: %s\n", plaintext);
+    return 0;
+}
+
