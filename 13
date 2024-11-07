@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define SIZE 2
+#define MOD 26
+void printMatrix(int matrix[SIZE][SIZE]) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+int modInverse(int a, int m) {
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) {
+            return x;
+        }
+    }
+    return -1; 
+}
+void inverseMatrix(int matrix[SIZE][SIZE], int inverse[SIZE][SIZE]) {
+    int det = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]) % MOD;
+    det = (det + MOD) % MOD; 
+    int detInv = modInverse(det, MOD);
+    if (detInv == -1) {
+        printf("Inverse doesn't exist\n");
+        return;
+    }
+    inverse[0][0] = (matrix[1][1] * detInv) % MOD;
+    inverse[0][1] = (-matrix[0][1] * detInv + MOD) % MOD;
+    inverse[1][0] = (-matrix[1][0] * detInv + MOD) % MOD;
+    inverse[1][1] = (matrix[0][0] * detInv) % MOD;
+}
+void knownPlaintextAttack(int plaintext[SIZE][SIZE], int ciphertext[SIZE][SIZE], int key[SIZE][SIZE]) {
+    int P_inv[SIZE][SIZE];
+    inverseMatrix(plaintext, P_inv);
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            key[i][j] = 0;
+            for (int k = 0; k < SIZE; k++) {
+                key[i][j] += (ciphertext[i][k] * P_inv[k][j]) % MOD;
+            }
+            key[i][j] %= MOD;
+        }
+    }
+}
+int main() {
+    int plaintext[SIZE][SIZE] = {
+        {7, 8}, 
+        {11, 11} 
+    };
+    int ciphertext[SIZE][SIZE] = {
+        {6, 25}, 
+        {11, 16} 
+    };
+    int key[SIZE][SIZE];
+    printf("Plaintext Matrix:\n");
+    printMatrix(plaintext);
+    printf("Ciphertext Matrix:\n");
+    printMatrix(ciphertext);
+    knownPlaintextAttack(plaintext, ciphertext, key);
+    printf("Calculated Key Matrix:\n");
+    printMatrix(key);
+    return 0;
+}
