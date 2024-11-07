@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define SIZE 5
+void createKeySquare(char key[], char keySquare[SIZE][SIZE]) {
+    int k = 0;
+    int flag[26] = {0}; 
+    for (int i = 0; i < strlen(key); i++) {
+        if (isalpha(key[i])) {
+            char ch = toupper(key[i]);
+            if (ch == 'J') ch = 'I'; 
+            if (flag[ch - 'A'] == 0) {
+                keySquare[k / SIZE][k % SIZE] = ch;
+                k++;
+                flag[ch - 'A'] = 1;
+            }
+        }
+    }
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        if (ch != 'J' && flag[ch - 'A'] == 0) {
+            keySquare[k / SIZE][k % SIZE] = ch;
+            k++;
+        }
+    }
+}
+void findPosition(char ch, char keySquare[SIZE][SIZE], int *row, int *col) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (keySquare[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+void decryptPlayfair(char cipherText[], char keySquare[SIZE][SIZE], char decryptedText[]) {
+    int i = 0, j = 0;
+    while (i < strlen(cipherText)) {
+        char first = cipherText[i++];
+        char second = cipherText[i++];
+        int r1, c1, r2, c2;
+        findPosition(first, keySquare, &r1, &c1);
+        findPosition(second, keySquare, &r2, &c2);
+        if (r1 == r2) {
+            decryptedText[j++] = keySquare[r1][(c1 + SIZE - 1) % SIZE];
+            decryptedText[j++] = keySquare[r2][(c2 + SIZE - 1) % SIZE];
+        } else if (c1 == c2) {
+            decryptedText[j++] = keySquare[(r1 + SIZE - 1) % SIZE][c1];
+            decryptedText[j++] = keySquare[(r2 + SIZE - 1) % SIZE][c2];
+        } else {
+            decryptedText[j++] = keySquare[r1][c2];
+            decryptedText[j++] = keySquare[r2][c1];
+        }
+    }
+    decryptedText[j] = '\0';  
+}
+int main() {
+    char key[] = "PT109"; 
+    char keySquare[SIZE][SIZE]; 
+    char cipherText[] = "KXJEY UREBE ZWEHE WRYTU HEYFS KREHE GOYFI WTTTU OLKSY CAJPO BOTEI ZONTX BYBNT GONEY CUZWR GDSON SXBOU YWRHE BAAHY USEDQ"; 
+    char decryptedText[100];  
+    char cleanedCipher[100];
+    int k = 0;
+    for (int i = 0; i < strlen(cipherText); i++) {
+        if (cipherText[i] != ' ') {
+            cleanedCipher[k++] = cipherText[i];
+        }
+    }
+    cleanedCipher[k] = '\0';
+    createKeySquare(key, keySquare);
+    decryptPlayfair(cleanedCipher, keySquare, decryptedText);
+    printf("Decrypted Message: %s\n", decryptedText);
+    return 0;
+}
