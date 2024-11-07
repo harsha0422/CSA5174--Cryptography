@@ -1,0 +1,59 @@
+#include <stdio.h>
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+int modInverse(int a, int m) {
+    for (int i = 1; i < m; i++) {
+        if ((a * i) % m == 1) {
+            return i;
+        }
+    }
+    return -1; 
+}
+void affineDecrypt(char *ciphertext, int a, int b, char *plaintext) {
+    int a_inv = modInverse(a, 26);
+    if (a_inv == -1) {
+        printf("No modular inverse exists. Cannot decrypt.\n");
+        return;
+    }
+    int i;
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        if ('A' <= ciphertext[i] && ciphertext[i] <= 'Z') {
+            int c = ciphertext[i] - 'A';
+            plaintext[i] = (a_inv * (c - b + 26)) % 26 + 'A';
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[i] = '\0';
+}
+int main() {
+    char ciphertext[100], plaintext[100];   
+    printf("Enter the ciphertext: ");
+    fgets(ciphertext, sizeof(ciphertext), stdin);
+    int most_frequent_cipher = 'B' - 'A'; 
+    int second_most_frequent_cipher = 'U' - 'A'; 
+    int most_frequent_plain = 'E' - 'A'; 
+    int second_most_frequent_plain = 'T' - 'A'; 
+    int a, b;
+    for (a = 1; a < 26; a++) {
+        if (gcd(a, 26) == 1) {  
+            for (b = 0; b < 26; b++) {
+                if (((a * most_frequent_plain + b) % 26 == most_frequent_cipher) &&
+                    ((a * second_most_frequent_plain + b) % 26 == second_most_frequent_cipher)) {
+                    printf("Found keys: a = %d, b = %d\n", a, b);
+                    affineDecrypt(ciphertext, a, b, plaintext);
+                    printf("Decrypted plaintext: %s\n", plaintext);
+                    return 0;
+                }
+            }
+        }
+    }
+    printf("No solution found.\n");
+    return 0;
+}
