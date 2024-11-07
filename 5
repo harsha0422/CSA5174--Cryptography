@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+int modInverse(int a, int m) {
+    for (int i = 1; i < m; i++) {
+        if ((a * i) % m == 1) {
+            return i;
+        }
+    }
+    return -1; 
+}
+void affineEncrypt(char *plaintext, int a, int b, char *ciphertext) {
+    int i;
+    for (i = 0; plaintext[i] != '\0'; i++) {
+        if (isalpha(plaintext[i])) {
+            char letter = toupper(plaintext[i]);
+            int p = letter - 'A';
+            ciphertext[i] = (a * p + b) % 26 + 'A';
+        } else {
+            ciphertext[i] = plaintext[i];
+        }
+    }
+    ciphertext[i] = '\0';
+}
+void affineDecrypt(char *ciphertext, int a, int b, char *plaintext) {
+    int a_inv = modInverse(a, 26);
+    if (a_inv == -1) {
+        printf("No modular inverse exists. Cannot decrypt.\n");
+        return;
+    }
+    int i;
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i])) {
+            char letter = toupper(ciphertext[i]);
+            int c = letter - 'A';
+            plaintext[i] = (a_inv * (c - b + 26)) % 26 + 'A';
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[i] = '\0';
+}
+int main() {
+    char plaintext[100], ciphertext[100], decryptedText[100];
+    int a, b;
+    printf("Enter the plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    printf("Enter the value of a (must be coprime with 26): ");
+    scanf("%d", &a);
+    printf("Enter the value of b: ");
+    scanf("%d", &b);
+    if (gcd(a, 26) != 1) {
+        printf("Invalid key. 'a' and 26 must be coprime.\n");
+        return 1;
+    }
+    affineEncrypt(plaintext, a, b, ciphertext);
+    printf("Encrypted ciphertext: %s\n", ciphertext);
+    affineDecrypt(ciphertext, a, b, decryptedText);
+    printf("Decrypted plaintext: %s\n", decryptedText);
+    return 0;
+}
