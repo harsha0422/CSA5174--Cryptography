@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define SIZE 2 
+int key[SIZE][SIZE] = {{9, 4}, {5, 7}};
+int charToNum(char ch) {
+    return toupper(ch) - 'A';
+}
+char numToChar(int num) {
+    return (char)(num + 'A');
+}
+void encrypt(char plaintext[], char ciphertext[]) {
+    int n = strlen(plaintext);
+    for (int i = 0; i < n; i += 2) {
+        int a = charToNum(plaintext[i]);
+        int b = charToNum(plaintext[i + 1]);
+        int encrypted_a = (key[0][0] * a + key[0][1] * b) % 26;
+        int encrypted_b = (key[1][0] * a + key[1][1] * b) % 26;
+        ciphertext[i] = numToChar(encrypted_a);
+        ciphertext[i + 1] = numToChar(encrypted_b);
+    }
+    ciphertext[n] = '\0'; 
+}
+int modInverse(int a, int m) {
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) return x;
+    }
+    return -1;
+}
+void decrypt(char ciphertext[], char decrypted[]) {
+    int n = strlen(ciphertext);
+    int det = (key[0][0] * key[1][1] - key[0][1] * key[1][0]) % 26;
+    if (det < 0) det += 26; 
+    int invDet = modInverse(det, 26);
+    int inverseKey[SIZE][SIZE] = {
+        { (key[1][1] * invDet) % 26, (-key[0][1] * invDet) % 26 },
+        { (-key[1][0] * invDet) % 26, (key[0][0] * invDet) % 26 }
+    };
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (inverseKey[i][j] < 0) inverseKey[i][j] += 26;
+        }
+    }
+    for (int i = 0; i < n; i += 2) {
+        int a = charToNum(ciphertext[i]);
+        int b = charToNum(ciphertext[i + 1]);
+        int decrypted_a = (inverseKey[0][0] * a + inverseKey[0][1] * b) % 26;
+        int decrypted_b = (inverseKey[1][0] * a + inverseKey[1][1] * b) % 26;
+        decrypted[i] = numToChar(decrypted_a);
+        decrypted[i + 1] = numToChar(decrypted_b);
+    }
+    decrypted[n] = '\0'; 
+}
+int main() {
+    char plaintext[] = "MEETMEATTHEUSUALPLACEATTENRATHERTHANEIGHTOCLOCK";
+    char ciphertext[100];
+    char decrypted[100];
+    encrypt(plaintext, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+    decrypt(ciphertext, decrypted);
+    printf("Decrypted Text: %s\n", decrypted);
+    return 0;
+}
