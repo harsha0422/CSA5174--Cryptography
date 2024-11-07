@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define ALPHABET_SIZE 26
+void generateCipherAlphabet(char *keyword, char *cipher) {
+    int used[ALPHABET_SIZE] = {0};
+    int index = 0;
+    for (int i = 0; i < strlen(keyword); i++) {
+        char letter = toupper(keyword[i]);
+        if (!used[letter - 'A']) {
+            cipher[index++] = letter;
+            used[letter - 'A'] = 1;
+        }
+    }
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        if (!used[i]) {
+            cipher[index++] = 'A' + i;
+        }
+    }
+    cipher[index] = '\0'; 
+}
+void encryptMessage(char *plaintext, char *cipher) {
+    for (int i = 0; i < strlen(plaintext); i++) {
+        if (isalpha(plaintext[i])) {
+            char letter = toupper(plaintext[i]);
+            printf("%c", cipher[letter - 'A']);
+        } else {
+            printf("%c", plaintext[i]); 
+        }
+    }
+    printf("\n");
+}
+int main() {
+    char keyword[] = "CIPHER";
+    char cipher[ALPHABET_SIZE + 1];
+    char plaintext[] = "meet me at the usual place at ten rather than eight oclock";
+    generateCipherAlphabet(keyword, cipher);
+    printf("Plain : ");
+    for (char c = 'A'; c <= 'Z'; c++) {
+        printf("%c ", c);
+    }
+    printf("\nCipher: ");
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        printf("%c ", cipher[i]);
+    }
+    printf("\n\n");
+    printf("Plaintext: %s\n", plaintext);
+    printf("Ciphertext: ");
+    encryptMessage(plaintext, cipher);
+    return 0;
+}
