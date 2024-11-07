@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/des.h>
+void handle_errors(const char *msg) {
+    perror(msg);
+    exit(1);
+}
+void encrypt_3des_cbc(const unsigned char *plaintext, int plaintext_len, unsigned char *key,
+                      unsigned char *iv, unsigned char *ciphertext, int *ciphertext_len) {
+    DES_cblock key1, key2, key3;
+    DES_key_schedule ks1, ks2, ks3;
+    int len = 0;
+    memcpy(key1, key, 8);
+    memcpy(key2, key + 8, 8);
+    memcpy(key3, key + 16, 8);
+    DES_set_key((C_Block *)key1, &ks1);
+    DES_set_key((C_Block *)key2, &ks2);
+    DES_set_key((C_Block *)key3, &ks3);
+    DES_ede3_cbc_encrypt(plaintext, ciphertext, plaintext_len, &ks1, &ks2, &ks3, (C_Block *)iv, DES_ENCRYPT);
+    *ciphertext_len = ((plaintext_len + 7) / 8) * 8; 
+}
+int main() {
+    unsigned char key[24] = "123456789012345678901234"; 
+    unsigned char iv[8] = "12345678"; 
+    unsigned char plaintext[] = "This is a test message for CBC mode encryption using 3DES!";
+    unsigned char ciphertext[128];
+    int ciphertext_len;
+    printf("Plaintext: %s\n", plaintext);
+    encrypt_3des_cbc(plaintext, strlen((const char *)plaintext), key, iv, ciphertext, &ciphertext_len);
+    printf("Ciphertext (hex): ");
+    for (int i = 0; i < ciphertext_len; i++) {
+        printf("%02X", ciphertext[i]);
+    }
+    printf("\n");
+    return 0;
+}
