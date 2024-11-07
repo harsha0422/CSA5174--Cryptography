@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX 100
+void prepareText(char *text) {
+    int i = 0, j = 0;
+    while (text[i] != '\0') {
+        if (isalpha(text[i])) {
+            text[j++] = toupper(text[i]);
+        }
+        i++;
+    }
+    text[j] = '\0';
+}
+void encryptVigenere(char *plaintext, char *key, char *ciphertext) {
+    int ptLen = strlen(plaintext);
+    int keyLen = strlen(key);
+    int i, j = 0;
+    for (i = 0; i < ptLen; i++) {
+        if (isalpha(plaintext[i])) {
+            int shift = toupper(key[j % keyLen]) - 'A';
+            ciphertext[i] = ((toupper(plaintext[i]) - 'A' + shift) % 26) + 'A';
+            j++;
+        }
+    }
+    ciphertext[i] = '\0'; 
+}
+int main() {
+    char plaintext[MAX], key[MAX], ciphertext[MAX];
+    printf("Enter the plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    printf("Enter the key: ");
+    fgets(key, sizeof(key), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
+    key[strcspn(key, "\n")] = '\0';
+    prepareText(plaintext);
+    encryptVigenere(plaintext, key, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+    return 0;
+}
