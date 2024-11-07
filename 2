@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <string.h>
+const char *plaintext_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char *ciphertext_alphabet = "QWERTYUIOPASDFGHJKLZXCVBNM";
+void monoalphabeticCipher(char *text) {
+    int i, j;
+    char ch;
+    for (i = 0; text[i] != '\0'; ++i) {
+        ch = text[i];
+        if (ch >= 'A' && ch <= 'Z') {
+            for (j = 0; j < 26; ++j) {
+                if (ch == plaintext_alphabet[j]) {
+                    text[i] = ciphertext_alphabet[j];
+                    break;
+                }
+            }
+        }
+        else if (ch >= 'a' && ch <= 'z') {
+            for (j = 0; j < 26; ++j) {
+                if (ch == plaintext_alphabet[j] + 32) {  
+                    text[i] = ciphertext_alphabet[j] + 32;
+                    break;
+                }
+            }
+        }
+    }
+}
+int main() {
+    char text[100];
+    printf("Enter a string: ");
+    fgets(text, sizeof(text), stdin);
+    monoalphabeticCipher(text);
+    printf("Encrypted text: %s\n", text);
+    return 0;
+}
