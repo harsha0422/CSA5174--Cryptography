@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <math.h>
+double factorial(int n) {
+    double result = 1;
+    for (int i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result;
+}
+int approximate_power_of_2(double number) {
+    return (int)(log(number) / log(2));
+}
+int main() {
+    int n = 25;
+    double total_keys = factorial(n);
+    int approx_power_2 = approximate_power_of_2(total_keys);
+    double unique_keys = total_keys / pow(2, 5);
+    int approx_unique_power_2 = approximate_power_of_2(unique_keys);
+    printf("Approximate total number of keys (as power of 2): 2^%d\n", approx_power_2);
+    printf("Approximate unique number of keys (considering symmetry, as power of 2): 2^%d\n", approx_unique_power_2);
+    return 0;
+}
