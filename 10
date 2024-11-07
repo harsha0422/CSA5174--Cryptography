@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define SIZE 5
+void createPlayfairMatrix(char key[], char matrix[SIZE][SIZE]) {
+    int k = 0;
+    int flag[26] = {0}; 
+    for (int i = 0; i < strlen(key); i++) {
+        char ch = toupper(key[i]);
+        if (isalpha(ch) && ch != 'J' && flag[ch - 'A'] == 0) {
+            matrix[k / SIZE][k % SIZE] = ch;
+            k++;
+            flag[ch - 'A'] = 1;
+        }
+    }
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        if (ch != 'J' && flag[ch - 'A'] == 0) {
+            matrix[k / SIZE][k % SIZE] = ch;
+            k++;
+        }
+    }
+}
+void findPosition(char ch, char matrix[SIZE][SIZE], int *row, int *col) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (matrix[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+void preprocessMessage(char message[], char preprocessed[]) {
+    int k = 0;
+    for (int i = 0; i < strlen(message); i++) {
+        if (isalpha(message[i])) {
+            preprocessed[k++] = toupper(message[i]);
+        }
+    }
+    for (int i = 0; i < k - 1; i++) {
+        if (preprocessed[i] == preprocessed[i + 1]) {
+            for (int j = k; j > i + 1; j--) {
+                preprocessed[j] = preprocessed[j - 1];
+            }
+            preprocessed[i + 1] = 'X';
+            k++;
+        }
+    }
+    if (k % 2 != 0) {
+        preprocessed[k++] = 'X'; 
+    }
+    preprocessed[k] = '\0';
+}
+void encryptMessage(char message[], char matrix[SIZE][SIZE], char encrypted[]) {
+    int k = 0;
+    for (int i = 0; i < strlen(message); i += 2) {
+        char first = message[i];
+        char second = message[i + 1];
+        int r1, c1, r2, c2;
+        findPosition(first, matrix, &r1, &c1);
+        findPosition(second, matrix, &r2, &c2);
+        if (r1 == r2) {
+            encrypted[k++] = matrix[r1][(c1 + 1) % SIZE];
+            encrypted[k++] = matrix[r2][(c2 + 1) % SIZE];
+        } else if (c1 == c2) {
+            encrypted[k++] = matrix[(r1 + 1) % SIZE][c1];
+            encrypted[k++] = matrix[(r2 + 1) % SIZE][c2];
+        } else {
+            encrypted[k++] = matrix[r1][c2];
+            encrypted[k++] = matrix[r2][c1];
+        }
+    }
+    encrypted[k] = '\0';
+}
+int main() {
+    char key[] = "MFHIJKUNOPQZVWXYELARGDSTBC"; 
+    char matrix[SIZE][SIZE];
+    char message[] = "Must see you over Cadogan West. Coming at once.";
+    char preprocessed[100];
+    char encrypted[100];
+    createPlayfairMatrix(key, matrix);
+    preprocessMessage(message, preprocessed);
+    printf("Preprocessed Message: %s\n", preprocessed);
+    encryptMessage(preprocessed, matrix, encrypted);
+    printf("Encrypted Message: %s\n", encrypted);
+    return 0;
+}
