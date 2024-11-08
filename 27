@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdint.h>
+uint64_t mod_exp(uint64_t base, uint64_t exp, uint64_t mod) {
+    uint64_t result = 1;
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result = (result * base) % mod;
+        }
+        base = (base * base) % mod;
+        exp /= 2;
+    }
+    return result;
+}
+void rsa_encrypt_message(const char *message, uint64_t e, uint64_t n) {
+    printf("Encrypted message: ");
+    for (int i = 0; message[i] != '\0'; i++) {
+        int m = (message[i] - 'A') % 26;
+        uint64_t c = mod_exp(m, e, n);
+        printf("%llu ", c);
+    }
+    printf("\n");
+}
+int main() {
+    uint64_t e = 17;      
+    uint64_t n = 3233;     
+    char message[] = "HELLO";
+    printf("Original message: %s\n", message);
+    rsa_encrypt_message(message, e, n);
+    return 0;
+}
