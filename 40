@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_TEXT_LENGTH 1000
+#define ALPHABET_SIZE 26
+void calculate_frequency(const char *text, int *freq) {
+    for (int i = 0; i < strlen(text); i++) {
+        if (isalpha(text[i])) {
+            freq[toupper(text[i]) - 'A']++;
+        }
+    }
+}
+void decrypt(const char *ciphertext, char *plaintext, const char *key) {
+    for (int i = 0; i < strlen(ciphertext); i++) {
+        if (isalpha(ciphertext[i])) {
+            char offset = islower(ciphertext[i]) ? 'a' : 'A';
+            int index = toupper(ciphertext[i]) - 'A';
+            plaintext[i] = islower(ciphertext[i]) ? tolower(key[index]) : key[index];
+        } else {
+            plaintext[i] = ciphertext[i];
+        }
+    }
+    plaintext[strlen(ciphertext)] = '\0';
+}
+double score_plaintext(const char *plaintext) {
+    double english_freq[ALPHABET_SIZE] = {12.70, 9.06, 8.17, 7.51, 6.97, 6.75, 6.33, 6.09, 5.99, 4.25,
+                                          4.03, 2.78, 2.76, 2.41, 2.36, 2.23, 2.02, 1.97, 1.49, 0.98,
+                                          0.77, 0.15, 0.15, 0.10, 0.09, 0.07};
+    int freq[ALPHABET_SIZE] = {0};
+    calculate_frequency(plaintext, freq);
+
+    double score = 0.0;
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        score += freq[i] * english_freq[i];
+    }
+    return score;
+}
+int main() {
+    char ciphertext[MAX_TEXT_LENGTH];
+    printf("Enter the ciphertext: ");
+    fgets(ciphertext, MAX_TEXT_LENGTH, stdin);
+    ciphertext[strlen(ciphertext) - 1] = '\0';
+    int top_n;
+    printf("Enter the number of top possible plaintexts: ");
+    scanf("%d", &top_n);
+    char possible_plaintexts[top_n][MAX_TEXT_LENGTH];
+    double scores[top_n];
+    for (int i = 0; i < top_n; i++) {
+        scores[i] = -1.0;
+    }
+    const char* frequent_letters = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        char key[ALPHABET_SIZE + 1];
+        for (int j = 0; j < ALPHABET_SIZE; j++) {
+            key[j] = frequent_letters[(j + i) % ALPHABET_SIZE];
+        }
+        key[ALPHABET_SIZE] = '\0';
+        char plaintext[MAX_TEXT_LENGTH];
+        decrypt(ciphertext, plaintext, key);
+        double score = score_plaintext(plaintext);
+        for (int k = 0; k < top_n; k++) {
+            if (score > scores[k]) {
+                for (int l = top_n - 1; l > k; l--) {
+                    scores[l] = scores[l - 1];
+                    strcpy(possible_plaintexts[l], possible_plaintexts[l - 1]);
+                }
+                scores[k] = score;
+                strcpy(possible_plaintexts[k], plaintext);
+                break;
+            }
+        }
+    }
+    printf("\nTop %d possible plaintexts:\n", top_n);
+    for (int i = 0; i < top_n; i++) {
+        printf("%d: %s\n", i + 1, possible_plaintexts[i]);
+    }
+    return 0;
+}
