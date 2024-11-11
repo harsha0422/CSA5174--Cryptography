@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/des.h>
+void print_hex(unsigned char *data, int length) {
+    for (int i = 0; i < length; i++) {
+        printf("%02x", data[i]);
+    }
+    printf("\n");
+}
+void des_encrypt(const unsigned char *key, const unsigned char *plaintext, unsigned char *ciphertext) {
+    DES_key_schedule key_schedule;
+    DES_cblock key_block;
+    memcpy(key_block, key, 8);  
+    DES_set_key_checked(&key_block, &key_schedule);
+    DES_ecb_encrypt((DES_cblock *)plaintext, (DES_cblock *)ciphertext, &key_schedule, DES_ENCRYPT);
+}
+void des_decrypt(const unsigned char *key, const unsigned char *ciphertext, unsigned char *plaintext) {
+    DES_key_schedule key_schedule;
+    DES_cblock key_block;
+    memcpy(key_block, key, 8);  
+    DES_set_key_checked(&key_block, &key_schedule);
+    DES_ecb_encrypt((DES_cblock *)ciphertext, (DES_cblock *)plaintext, &key_schedule, DES_DECRYPT);
+}
+int main() {
+    unsigned char key[8] = {0x13, 0x34, 0x57, 0x79, 0x9b, 0xbc, 0xdf, 0xf1}; 
+    unsigned char plaintext[8] = "ABCDEFGH";  
+    unsigned char ciphertext[8];
+    unsigned char decrypted_text[8];
+    des_encrypt(key, plaintext, ciphertext);
+    printf("Original Plaintext: %s\n", plaintext);
+    printf("Encrypted Ciphertext (hex): ");
+    print_hex(ciphertext, 8); 
+    des_decrypt(key, ciphertext, decrypted_text);
+    printf("Decrypted Text: %s\n", decrypted_text);  
+    return 0;
+}
